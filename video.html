@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You 🎬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .video-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--pink) 0%, var(--cream) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .video-header {
+      text-align: center;
+      margin-bottom: 36px;
+      z-index: 1;
+    }
+
+    .video-label {
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .video-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+
+    .video-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-mid);
+      font-weight: 300;
+    }
+
+    /* Video frame */
+    .video-frame {
+      z-index: 10;
+      position: relative;
+      max-width: 760px;
+      width: 92%;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(58, 46, 53, 0.25);
+      border: 6px solid #fff;
+      animation: revealVideo 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes revealVideo {
+      from { opacity: 0; transform: translateY(40px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .video-frame::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, var(--green), var(--pink));
+      z-index: -1;
+      filter: blur(20px);
+      opacity: 0.55;
+    }
+
+    .video-frame video {
+      width: 100%;
+      display: block;
+      border-radius: 18px;
+    }
+
+    /* Sparkles */
+    .sparkle {
+      position: absolute;
+      font-size: 1.6rem;
+      animation: floatSparkle 4s ease-in-out infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .sparkle:nth-child(1) { top: 8%;  left: 6%;  animation-delay: 0s; }
+    .sparkle:nth-child(2) { top: 10%; right: 8%; animation-delay: 1s; }
+    .sparkle:nth-child(3) { bottom: 14%; left: 5%;  animation-delay: 2s; }
+    .sparkle:nth-child(4) { bottom: 10%; right: 6%; animation-delay: 0.5s; }
+
+    .video-footer {
+      margin-top: 32px;
+      text-align: center;
+      z-index: 11;
+      position: relative;
+    }
+
+    .video-footer p {
+      font-size: 1rem;
+      color: var(--text-mid);
+      font-weight: 300;
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .heart-btn {
+      font-size: 3rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+      transition: transform 0.15s ease;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .heart-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .heart-btn.pop {
+      animation: heartPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes heartPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.5); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="video-page">
+
+    <!-- Background blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Floating sparkles -->
+    <span class="sparkle">🎬</span>
+    <span class="sparkle">✨</span>
+    <span class="sparkle">💫</span>
+    <span class="sparkle">🌸</span>
+
+    <!-- Header -->
+    <div class="video-header">
+      <p class="video-label">🎁 A little something for you</p>
+      <h1 class="video-title">Sit back & enjoy</h1>
+      <p class="video-subtitle">Press play and let it loop 🎶</p>
+    </div>
+
+    <!-- Looping Video -->
+    <div class="video-frame">
+      <video
+        id="mainVideo"
+        src="video.mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+        controls
+      ></video>
+    </div>
+
+    <!-- Heart section -->
+    <div class="video-footer">
+      <p>Click the emoji if you liked the video 🎬</p>
+      <button class="heart-btn" id="heartBtn" title="Like">❤️</button>
+    </div>
+
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <style>
+    #confettiCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+  </style>
+
+  <script>
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx    = canvas.getContext("2d");
+
+    // Use the site's theme colours + extras for variety
+    const COLORS = [
+      "#FFE9EF", "#93C572", "#F5F5DC",
+      "#f7c5d0", "#b8dea0", "#fff",
+      "#ffd6e0", "#c9f0a8", "#ffe4b5",
+      "#ffb7c5", "#a8d8a8"
+    ];
+
+    const SHAPES = ["rect", "circle", "ribbon"];
+
+    let pieces = [];
+    const MAX_PIECES = 160;
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    function randomBetween(a, b) {
+      return a + Math.random() * (b - a);
+    }
+
+    function createPiece() {
+      return {
+        x:       randomBetween(0, canvas.width),
+        y:       randomBetween(-40, -10),
+        w:       randomBetween(7, 14),
+        h:       randomBetween(4, 10),
+        color:   COLORS[Math.floor(Math.random() * COLORS.length)],
+        shape:   SHAPES[Math.floor(Math.random() * SHAPES.length)],
+        speedY:  randomBetween(1.8, 4.2),
+        speedX:  randomBetween(-1.2, 1.2),
+        angle:   randomBetween(0, Math.PI * 2),
+        spin:    randomBetween(-0.08, 0.08),
+        opacity: randomBetween(0.7, 1),
+      };
+    }
+
+    // Pre-populate
+    for (let i = 0; i < MAX_PIECES; i++) {
+      const p = createPiece();
+      p.y = randomBetween(0, canvas.height); // spread on load
+      pieces.push(p);
+    }
+
+    function drawPiece(p) {
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle   = p.color;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+
+      if (p.shape === "rect") {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      } else if (p.shape === "circle") {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // ribbon — thin long strip
+        ctx.fillRect(-p.w, -p.h / 4, p.w * 2, p.h / 2);
+      }
+
+      ctx.restore();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      pieces.forEach((p, i) => {
+        drawPiece(p);
+
+        p.y     += p.speedY;
+        p.x     += p.speedX;
+        p.angle += p.spin;
+
+        // Recycle when off screen
+        if (p.y > canvas.height + 20) {
+          pieces[i] = createPiece();
+        }
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Heart click — pop then redirect
+    const heartBtn = document.getElementById("heartBtn");
+    heartBtn.addEventListener("click", () => {
+      heartBtn.classList.remove("pop");
+      void heartBtn.offsetWidth;
+      heartBtn.classList.add("pop");
+      setTimeout(() => {
+        window.location.href = "gallery.html";
+      }, 420);
+    });
+  </script>
+
+</body>
+</html>
