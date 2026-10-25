@@ -9,13 +9,16 @@ const items = [
   "Better Luck\nNext Time"
 ];
 
+// Number of segments that are real prizes (Better Luck is last — never selected)
+const NUM_PRIZE_SEGMENTS = 4;
+
 // Colours drawn from the site theme palette
 const SEGMENT_COLORS = [
   "#FFE9EF",  // blush pink
   "#93C572",  // pistachio green
-  "#F5F5DC",  // cream
   "#f7c5d0",  // deeper pink
   "#b8dea0",  // lighter green
+  "#F5F5DC",  // cream — Better Luck Next Time
 ];
 
 const TEXT_COLOR = "#3a2e35";
@@ -29,11 +32,11 @@ const spinBtn   = document.getElementById("spinBtn");
 const overlay   = document.getElementById("resultOverlay");
 const resultTxt = document.getElementById("resultText");
 
-const NUM_SEGMENTS = items.length;
+const NUM_SEGMENTS = items.length;               // 4
 const ARC          = (2 * Math.PI) / NUM_SEGMENTS;
 const CX           = canvas.width  / 2;
 const CY           = canvas.height / 2;
-const RADIUS       = CX - 8;        // slight inset from border
+const RADIUS       = CX - 8;
 
 let currentAngle = 0;   // current rotation offset in radians
 let hasSpun      = false;
@@ -103,35 +106,44 @@ spinBtn.addEventListener("click", () => {
   hasSpun = true;
   spinBtn.disabled = true;
 
-  // Pick a random target segment (0 to NUM_SEGMENTS-1)
-  const winIndex = Math.floor(Math.random() * NUM_SEGMENTS);
+  // Pick randomly from real prizes only — never index 4 (Better Luck Next Time)
+  const winIndex = Math.floor(Math.random() * NUM_PRIZE_SEGMENTS);
 
-  // Compute target rotation so that the winning segment's centre aligns with the pointer at -π/2
-  const targetRotation = -Math.PI / 2 - (winIndex * ARC + ARC / 2);
-  // Ensure we rotate in the positive (clockwise) direction by adding enough full spins
-  const totalSpins = 6 + Math.random() * 4; // 6‑10 full rotations
-  const totalRotation = totalSpins * 2 * Math.PI + ((targetRotation - currentAngle + 2 * Math.PI) % (2 * Math.PI));
+  // The centre of segment winIndex sits at angle:
+  //   currentAngle + winIndex * ARC + ARC / 2
+  // We want that centre to land at the top pointer = -π/2
+  // So target rotation satisfies:
+  //   targetAngle + winIndex * ARC + ARC / 2 ≡ -π/2  (mod 2π)
+  //   targetAngle = -π/2 - winIndex * ARC - ARC / 2
+  const targetAngle = -Math.PI / 2 - winIndex * ARC - ARC / 2;
 
-  const duration   = 5000;  // ms
+  // Compute how far we need to spin from currentAngle to targetAngle,
+  // always going clockwise (positive direction), then add extra full rotations.
+  const minSpins  = 6;   // minimum full rotations for drama
+  const extraSpin = Math.floor(Math.random() * 4); // 0–3 bonus rotations
+  const delta     = ((targetAngle - currentAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+  const totalRotation = (minSpins + extraSpin) * 2 * Math.PI + delta;
+
+  const duration   = 5000; // ms
   const startTime  = performance.now();
   const startAngle = currentAngle;
 
   function easeOut(t) {
-    return 1 - Math.pow(1 - t, 4);  // quartic ease-out
+    return 1 - Math.pow(1 - t, 4); // quartic ease-out
   }
 
   function animate(now) {
     const elapsed  = now - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    const eased    = easeOut(progress);
-
-    currentAngle = startAngle + totalRotation * eased;
+    currentAngle   = startAngle + totalRotation * easeOut(progress);
     drawWheel(currentAngle);
 
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      // Spin done — show result
+      // Snap exactly to target so there's zero floating-point drift
+      currentAngle = startAngle + totalRotation;
+      drawWheel(currentAngle);
       onSpinComplete(winIndex);
     }
   }
@@ -143,25 +155,13 @@ spinBtn.addEventListener("click", () => {
 // RESULT & REDIRECT
 // ===========================
 function onSpinComplete(winIndex) {
-  // Determine the displayed prize based on the final wheel angle
-  const normalizedAngle = ( -Math.PI / 2 - currentAngle + 2 * Math.PI ) % (2 * Math.PI);
-  const displayedIndex = Math.floor(normalizedAngle / ARC) % NUM_SEGMENTS;
-  const prize = items[displayedIndex].replace("\n", " ");
+  // Always use winIndex directly — the wheel was rotated precisely to this segment
+  const prize = items[winIndex];
   resultTxt.textContent = prize;
   overlay.classList.remove("hidden");
 
-  // If the prize is "Better Luck Next Time", allow another spin
-  if (prize.includes("Better Luck")) {
-    setTimeout(() => {
-      overlay.classList.add("hidden");
-      const loaderFill = document.querySelector(".loader-fill");
-      if (loaderFill) { loaderFill.style.animation = "none"; void loaderFill.offsetWidth; loaderFill.style.animation = ""; }
-      hasSpun = false;
-      spinBtn.disabled = false;
-    }, 2500);
-  } else {
-    setTimeout(() => {
-      window.location.href = "yearbook.html";
-    }, 3500);
-  }
+  // Redirect to yearbook after 3.5 seconds
+  setTimeout(() => {
+    window.location.href = "yearbook.html";
+  }, 3500);
 }
