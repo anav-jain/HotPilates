@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You 🎀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .video2-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #FFE9EF 0%, #ffd6e4 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Decorative blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .blob-1 { width: 340px; height: 340px; background: #f7c5d0; top: -80px; left: -80px; }
+    .blob-2 { width: 260px; height: 260px; background: #FFE9EF; bottom: -60px; right: -60px; }
+
+    /* Floating sparkles */
+    .sparkle {
+      position: absolute;
+      font-size: 1.4rem;
+      animation: floatSparkle 5s ease-in-out infinite;
+      pointer-events: none;
+      user-select: none;
+    }
+    .sparkle:nth-child(1) { top: 8%;  left: 6%;  animation-delay: 0s; }
+    .sparkle:nth-child(2) { top: 12%; right: 8%; animation-delay: 1s; }
+    .sparkle:nth-child(3) { bottom: 15%; left: 10%; animation-delay: 2s; }
+    .sparkle:nth-child(4) { bottom: 10%; right: 12%; animation-delay: 0.5s; }
+    @keyframes floatSparkle {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+
+    /* Video card */
+    .video-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 720px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,200,220,0.5);
+      border-radius: 24px;
+      box-shadow: 0 12px 48px rgba(255,150,180,0.2);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+
+    .video-card video {
+      width: 100%;
+      display: block;
+      border-radius: 24px;
+    }
+
+    /* Back button */
+    .back-btn {
+      position: relative;
+      z-index: 1;
+      margin-top: 36px;
+      display: inline-block;
+      padding: 13px 44px;
+      background: linear-gradient(135deg, #FFE9EF, #ffd6e4);
+      color: #3a2e35;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border: 2px solid #f7c5d0;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 4px 18px rgba(255,150,180,0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .back-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 28px rgba(255,150,180,0.45);
+    }
+  </style>
+</head>
+<body>
+  <div class="video2-page">
+    <!-- Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- Sparkles -->
+    <span class="sparkle">💫</span>
+    <span class="sparkle">🎀</span>
+    <span class="sparkle">🌸</span>
+    <span class="sparkle">✨</span>
+
+    <!-- Video -->
+    <div class="video-card">
+      <!-- Replace "your-video.mp4" with your actual video filename -->
+      <video controls autoplay>
+        <source src="video2.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <a href="gallery.html" class="back-btn">← Back</a>
+  </div>
+</body>
+</html>
