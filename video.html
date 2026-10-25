@@ -11,7 +11,7 @@
   <style>
     .video-page {
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--pink) 0%, var(--cream) 100%);
+      background: linear-gradient(135deg, #FFE9EF 0%, #ffd6e4 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -153,12 +153,7 @@
     <span class="sparkle">💫</span>
     <span class="sparkle">🌸</span>
 
-    <!-- Header -->
-    <div class="video-header">
-      <p class="video-label">🎁 A little something for you</p>
-      <h1 class="video-title">Sit back & enjoy</h1>
-      <p class="video-subtitle">Press play and let it loop 🎶</p>
-    </div>
+
 
     <!-- Looping Video -->
     <div class="video-frame">
@@ -196,20 +191,15 @@
 
   <script>
     const canvas = document.getElementById("confettiCanvas");
-    const ctx    = canvas.getContext("2d");
+    const ctx    = canvas.getContext("2d", { willReadFrequently: false });
 
-    // Use the site's theme colours + extras for variety
     const COLORS = [
-      "#FFE9EF", "#93C572", "#F5F5DC",
-      "#f7c5d0", "#b8dea0", "#fff",
-      "#ffd6e0", "#c9f0a8", "#ffe4b5",
-      "#ffb7c5", "#a8d8a8"
+      "#FFE9EF", "#93C572", "#f7c5d0",
+      "#b8dea0", "#ffd6e0", "#ffb7c5"
     ];
 
-    const SHAPES = ["rect", "circle", "ribbon"];
-
+    const MAX_PIECES = 80; // reduced from 160
     let pieces = [];
-    const MAX_PIECES = 160;
 
     function resize() {
       canvas.width  = window.innerWidth;
@@ -218,69 +208,60 @@
     resize();
     window.addEventListener("resize", resize);
 
-    function randomBetween(a, b) {
-      return a + Math.random() * (b - a);
-    }
+    function rand(a, b) { return a + Math.random() * (b - a); }
 
-    function createPiece() {
+    function createPiece(spreadY) {
       return {
-        x:       randomBetween(0, canvas.width),
-        y:       randomBetween(-40, -10),
-        w:       randomBetween(7, 14),
-        h:       randomBetween(4, 10),
-        color:   COLORS[Math.floor(Math.random() * COLORS.length)],
-        shape:   SHAPES[Math.floor(Math.random() * SHAPES.length)],
-        speedY:  randomBetween(1.8, 4.2),
-        speedX:  randomBetween(-1.2, 1.2),
-        angle:   randomBetween(0, Math.PI * 2),
-        spin:    randomBetween(-0.08, 0.08),
-        opacity: randomBetween(0.7, 1),
+        x:      rand(0, canvas.width),
+        y:      spreadY ? rand(0, canvas.height) : rand(-40, -10),
+        w:      rand(6, 13),
+        h:      rand(4, 9),
+        color:  COLORS[Math.floor(Math.random() * COLORS.length)],
+        circle: Math.random() < 0.4,   // 40% circles, 60% rects — no ribbons
+        speedY: rand(1.5, 3.5),        // slightly slower for smoothness
+        speedX: rand(-0.8, 0.8),
+        angle:  rand(0, Math.PI * 2),
+        spin:   rand(-0.05, 0.05),     // less spin = less ctx work
+        alpha:  rand(0.65, 1),
       };
     }
 
-    // Pre-populate
-    for (let i = 0; i < MAX_PIECES; i++) {
-      const p = createPiece();
-      p.y = randomBetween(0, canvas.height); // spread on load
-      pieces.push(p);
-    }
-
-    function drawPiece(p) {
-      ctx.save();
-      ctx.globalAlpha = p.opacity;
-      ctx.fillStyle   = p.color;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.angle);
-
-      if (p.shape === "rect") {
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      } else if (p.shape === "circle") {
-        ctx.beginPath();
-        ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        // ribbon — thin long strip
-        ctx.fillRect(-p.w, -p.h / 4, p.w * 2, p.h / 2);
-      }
-
-      ctx.restore();
-    }
+    for (let i = 0; i < MAX_PIECES; i++) pieces.push(createPiece(true));
 
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      pieces.forEach((p, i) => {
-        drawPiece(p);
+      // Batch rects together, then circles — fewer state changes
+      ctx.beginPath();
+      for (const p of pieces) {
+        if (!p.circle) {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle   = p.color;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        }
+      }
 
+      for (const p of pieces) {
+        if (p.circle) {
+          ctx.beginPath();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle   = p.color;
+          ctx.arc(p.x, p.y, p.w / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < pieces.length; i++) {
+        const p = pieces[i];
         p.y     += p.speedY;
         p.x     += p.speedX;
         p.angle += p.spin;
-
-        // Recycle when off screen
-        if (p.y > canvas.height + 20) {
-          pieces[i] = createPiece();
-        }
-      });
+        if (p.y > canvas.height + 20) pieces[i] = createPiece(false);
+      }
 
       requestAnimationFrame(animate);
     }
