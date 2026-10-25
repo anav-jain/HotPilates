@@ -106,12 +106,11 @@ spinBtn.addEventListener("click", () => {
   // Pick a random target segment (0 to NUM_SEGMENTS-1)
   const winIndex = Math.floor(Math.random() * NUM_SEGMENTS);
 
-  // Total rotation: multiple full spins + angle to land winIndex under pointer
-  // Pointer is at top (angle = -π/2 from canvas 0).
-  // We want segment winIndex's midpoint to land at -π/2.
-  const targetMidAngle  = -(winIndex * ARC + ARC / 2);   // midpoint of winning segment at 12-o'clock
-  const totalSpins      = 6 + Math.random() * 4;          // 6-10 full rotations for drama
-  const totalRotation   = totalSpins * 2 * Math.PI + (targetMidAngle - currentAngle - Math.PI / 2 + 2 * Math.PI * 10) % (2 * Math.PI);
+  // Compute target rotation so that the winning segment's centre aligns with the pointer at -π/2
+  const targetRotation = -Math.PI / 2 - (winIndex * ARC + ARC / 2);
+  // Ensure we rotate in the positive (clockwise) direction by adding enough full spins
+  const totalSpins = 6 + Math.random() * 4; // 6‑10 full rotations
+  const totalRotation = totalSpins * 2 * Math.PI + ((targetRotation - currentAngle + 2 * Math.PI) % (2 * Math.PI));
 
   const duration   = 5000;  // ms
   const startTime  = performance.now();
@@ -144,12 +143,25 @@ spinBtn.addEventListener("click", () => {
 // RESULT & REDIRECT
 // ===========================
 function onSpinComplete(winIndex) {
-  const prize = items[winIndex].replace("\n", " ");
+  // Determine the displayed prize based on the final wheel angle
+  const normalizedAngle = ( -Math.PI / 2 - currentAngle + 2 * Math.PI ) % (2 * Math.PI);
+  const displayedIndex = Math.floor(normalizedAngle / ARC) % NUM_SEGMENTS;
+  const prize = items[displayedIndex].replace("\n", " ");
   resultTxt.textContent = prize;
   overlay.classList.remove("hidden");
 
-  // Redirect to yearbook after 3.5 seconds
-  setTimeout(() => {
-    window.location.href = "yearbook.html";
-  }, 3500);
+  // If the prize is "Better Luck Next Time", allow another spin
+  if (prize.includes("Better Luck")) {
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+      const loaderFill = document.querySelector(".loader-fill");
+      if (loaderFill) { loaderFill.style.animation = "none"; void loaderFill.offsetWidth; loaderFill.style.animation = ""; }
+      hasSpun = false;
+      spinBtn.disabled = false;
+    }, 2500);
+  } else {
+    setTimeout(() => {
+      window.location.href = "yearbook.html";
+    }, 3500);
+  }
 }
