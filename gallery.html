@@ -11,7 +11,7 @@
   <style>
     .gallery-page {
       min-height: 100vh;
-      background: linear-gradient(135deg, var(--green) 0%, var(--cream) 50%, var(--pink) 100%);
+      background: linear-gradient(135deg, #FFE9EF 0%, #ffd6e4 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -165,11 +165,8 @@
     <span class="sparkle">💫</span>
     <span class="sparkle">🎀</span>
 
-    <div class="gallery-header">
-      <p class="gallery-label">💖 Just for you</p>
-      <h1 class="gallery-title">Memories</h1>
-      <p class="gallery-subtitle">Every picture tells a story 🌼</p>
-    </div>
+
+
 
     <!-- Gallery grid — images will be added here -->
     <div class="gallery-grid" id="galleryGrid">
@@ -231,5 +228,27 @@
       if (e.key === "Escape") lightbox.classList.remove("active");
     });
   </script>
+
+  <div style="text-align:center; padding: 40px 20px 60px;">
+    <a href="video2.html" id="exitBtn" style="
+      display: inline-block;
+      padding: 14px 48px;
+      background: linear-gradient(135deg, #FFE9EF, #ffd6e4);
+      color: #3a2e35;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border: 2px solid #f7c5d0;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 4px 18px rgba(255, 150, 180, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    "
+    onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 28px rgba(255,150,180,0.45)'"
+    onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 18px rgba(255,150,180,0.3)'">
+      Exit
+    </a>
+  </div>
 </body>
 </html>
