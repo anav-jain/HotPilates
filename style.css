@@ -30,7 +30,7 @@ html, body {
 =========================== */
 .page-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--pink) 0%, var(--cream) 55%, #e8f5df 100%);
+  background: linear-gradient(135deg, var(--pink) 0%, var(--pink) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,7 +61,7 @@ html, body {
 
 .blob-2 {
   width: 350px; height: 350px;
-  background: var(--green);
+  background: var(--pink);
   bottom: -80px; right: -80px;
   opacity: 0.3;
   animation-delay: 2s;
@@ -69,7 +69,7 @@ html, body {
 
 .blob-3 {
   width: 280px; height: 280px;
-  background: var(--cream);
+  background: var(--pink);
   top: 30%; left: 60%;
   opacity: 0.5;
   animation-delay: 4s;
@@ -185,7 +185,7 @@ html, body {
 =========================== */
 .spin-btn {
   padding: 16px 56px;
-  background: linear-gradient(135deg, var(--green), #7ab55a);
+  background: var(--pink);
   border: none;
   border-radius: 50px;
   cursor: pointer;
@@ -320,7 +320,7 @@ html, body {
 .loader-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--green), #7ab55a);
+  background: #000;
   border-radius: 50px;
   animation: loadFill 2.8s ease forwards;
   animation-delay: 0.5s;
